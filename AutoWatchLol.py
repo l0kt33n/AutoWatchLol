@@ -19,6 +19,7 @@ def vod_list_retriever(league_url):
     for link in page.findAll('a', attrs={'href': re.compile("/vod/")}):
         links.append(link.get('href')[5:])
 
+    links = list(dict.fromkeys(links))
     driver.quit()
     return links
 
@@ -53,16 +54,29 @@ def vod_link_maker(vod_num):
     return 'watch.lolesports.com/vod/' + vod_num
 
 
+def login_checker():
+    try:
+        x, y = pyautogui.locateCenterOnScreen('Images/loginbutton.png')
+    except pyautogui.ImageNotFoundException:
+        return
+    pyautogui.click(x,y)
+    time.sleep(10)
+    return
+
+
 def auto_watch(vod_list):
     pyautogui.PAUSE = 3
     pyautogui.FAILSAFE = True
+    watch_time = 660
 
     for vod in vod_list:
         go_to_address_bar()
         pyautogui.write(vod_link_maker(vod))
         pyautogui.press('enter')
-        watch_time = 660
+        #time.sleep(5)
+        #login_checker()
         time.sleep(watch_time)
+        vod_list.remove(vod)
         close_and_open_new()
 
     return 0
@@ -70,7 +84,7 @@ def auto_watch(vod_list):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--f", default=0, type=str, help="Fetching new Vod lists and save it locally.")
+    parser.add_argument("--f", default=0, type=str, help="Fetching new Vod lists and saving it locally.")
     parser.add_argument("--s", default=0, type=str, help="Execute the script to watch Lol automatically.")
 
     args = parser.parse_args()
@@ -90,6 +104,8 @@ def main():
             time.sleep(1)
         auto_watch(links)
 
+    #TODO: Remake menu into console command
+    #TODO: Save links of all leagues in program and only need simple input instead of full link
 
 if __name__ == "__main__":
     main()
