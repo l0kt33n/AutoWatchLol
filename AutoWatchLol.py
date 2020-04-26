@@ -9,10 +9,13 @@ from selenium import webdriver
 from webdriver_manager.chrome import ChromeDriverManager
 
 
-def vod_list_retriever(league_url):
+def vod_list_retriever(league):
+    vodlist = {'lcs':'https://watch.lolesports.com/vods/lcs/lcs_2020_split1',
+               'lec':'https://watch.lolesports.com/vods/lec/lec_2020_split1',
+               'lck':'https://watch.lolesports.com/vods/lck/lck_2020_split1'}
     driver = webdriver.Chrome(ChromeDriverManager().install())
     driver.implicitly_wait(100)
-    driver.get(league_url)
+    driver.get(vodlist[league])
     time.sleep(10)
     page = BeautifulSoup(driver.page_source, 'html.parser')
     links = []
@@ -84,7 +87,7 @@ def auto_watch(vod_list):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--f", default=0, type=str, help="Fetching new Vod lists and saving it locally.")
+    parser.add_argument("--f", default=0, type=str, help="Use parameter ['lcs', 'lec','lck']")
     parser.add_argument("--s", default=0, type=str, help="Execute the script to watch Lol automatically.")
 
     args = parser.parse_args()
@@ -98,14 +101,15 @@ def main():
     if args.s:
         print("Opening saved VOD list.....")
         links = pickle.load(open(args.s, "rb"))
-        print("VOD list opened. Please switch to Safari Window. Script will execute in")
+        print("VOD list opened. Please switch to Safari Window.")
+        input("Press Enter to continue...")
+        print("Script will execute in:")
         for i in [5, 4, 3, 2, 1, 0]:
             print(i)
             time.sleep(1)
         auto_watch(links)
 
-    #TODO: Remake menu into console command
-    #TODO: Save links of all leagues in program and only need simple input instead of full link
+
 
 if __name__ == "__main__":
     main()
