@@ -6,21 +6,24 @@ import time
 import pyautogui
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 
 
 def vod_list_retriever(league):
-    vodlist = {'lcs':'https://watch.lolesports.com/vods/lcs/lcs_2020_split1',
-               'lec':'https://watch.lolesports.com/vods/lec/lec_2020_split1',
-               'lck':'https://watch.lolesports.com/vods/lck/lck_2020_split1'}
-    driver = webdriver.Chrome(ChromeDriverManager().install())
-    driver.implicitly_wait(100)
+    vodlist = {'lcs': 'https://watch.lolesports.com/vods/lcs/lcs_2020_split1',
+               'lec': 'https://watch.lolesports.com/vods/lec/lec_2020_split1',
+               'lck': 'https://watch.lolesports.com/vods/lck/lck_2020_split1'}
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    driver = webdriver.Chrome(ChromeDriverManager().install(), options=chrome_options)
     driver.get(vodlist[league])
-    time.sleep(10)
+    time.sleep(5)
     page = BeautifulSoup(driver.page_source, 'html.parser')
     links = []
-    for link in page.findAll('a', attrs={'href': re.compile("/vod/")}):
-        links.append(link.get('href')[5:])
+    for element in page.findAll('a', attrs={'href': re.compile("/vod/")}):
+        link = element.get('href')[5:]
+        links.append(link)
 
     links = list(dict.fromkeys(links))
     driver.quit()
@@ -62,7 +65,7 @@ def login_checker():
         x, y = pyautogui.locateCenterOnScreen('Images/loginbutton.png')
     except pyautogui.ImageNotFoundException:
         return
-    pyautogui.click(x,y)
+    pyautogui.click(x, y)
     time.sleep(10)
     return
 
@@ -76,8 +79,8 @@ def auto_watch(vod_list):
         go_to_address_bar()
         pyautogui.write(vod_link_maker(vod))
         pyautogui.press('enter')
-        #time.sleep(5)
-        #login_checker()
+        # time.sleep(5)
+        # login_checker()
         time.sleep(watch_time)
         vod_list.remove(vod)
         close_and_open_new()
@@ -108,7 +111,6 @@ def main():
             print(i)
             time.sleep(1)
         auto_watch(links)
-
 
 
 if __name__ == "__main__":
