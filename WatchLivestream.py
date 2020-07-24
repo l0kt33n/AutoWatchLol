@@ -6,7 +6,7 @@ def live_checker():
     from twitch import TwitchClient
 
     client = TwitchClient(client_id='szwbnpgk8onxagzegef9wja3fd5s9r')
-    channel_ids = ['124422593', '124420521']
+    channel_ids = ['124422593', '124420521','36029255', '46273272', '36511475', '36513760', '72977645', '107870305', '124425627']
 
     streams = []
     for channel_id in channel_ids:
