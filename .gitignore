@@ -14,3 +14,4 @@ pyvenv.cfg
 pip-selfcheck.json
 !/links.p
 /venv/
+/test.py
