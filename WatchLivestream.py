@@ -15,8 +15,9 @@ def live_checker():
     from twitch import TwitchClient
 
     client = TwitchClient(client_id='szwbnpgk8onxagzegef9wja3fd5s9r')
-    channel_ids = ['124422593', '124420521', '36029255', '46273272', '36511475', '36513760', '72977645', '107870305',
-                   '124425627', '104833324']
+    # channel_ids = ['124422593', '124420521', '36029255', '46273272', '36511475', '36513760', '72977645', '107870305',
+    #               '124425627', '104833324']
+    channel_ids = ['124422593', '124420521']
 
     streams = []
     for channel_id in channel_ids:
@@ -33,11 +34,11 @@ def watch_livestream(driver):
     url = 'https://lolesports.com/live/'
     driver.get(url)
     driver.implicitly_wait(5)
-    driver.find_element_by_class_name('options-button').click()
-    driver.find_element_by_class_name('option').click()
     try:
+        driver.find_element_by_class_name('options-button').click()
+        driver.find_element_by_class_name('option').click()
         driver.find_element_by_css_selector(
-            'body > div:nth-child(12) > main > main > div > div.lower > div.nav-details > div > div.stream-selector > div > div.watch-options > div > div.options-section.provider-selection > ul > li.option.twitch').click()
+                'body > div:nth-child(12) > main > main > div > div.lower > div.nav-details > div > div.stream-selector > div > div.watch-options > div > div.options-section.provider-selection > ul > li.option.twitch').click()
     except (ElementNotInteractableException, NoSuchElementException):
         pass
     sleep(watch_time)
