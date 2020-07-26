@@ -16,7 +16,7 @@ def live_checker():
 
     client = TwitchClient(client_id='szwbnpgk8onxagzegef9wja3fd5s9r')
     channel_ids = ['124422593', '124420521', '36029255', '46273272', '36511475', '36513760', '72977645', '107870305',
-                   '124425627']
+                   '124425627', '104833324']
 
     streams = []
     for channel_id in channel_ids:
@@ -60,6 +60,7 @@ def login(driver):
     stay_signed_in.click()
     driver.find_element_by_css_selector(
         'body > div > div > div > div.grid.grid-direction__row.grid-page-web__content > div.grid.grid-direction__column.grid-page-web__wrapper > div > button').click()
+    wait.until(EC.element_to_be_clickable((By.ID, 'riotbar-account')))
     return
 
 
