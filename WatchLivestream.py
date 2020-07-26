@@ -1,7 +1,7 @@
 from time import sleep
 
 from selenium import webdriver
-from selenium.common.exceptions import ElementNotInteractableException
+from selenium.common.exceptions import ElementNotInteractableException, NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
@@ -38,7 +38,7 @@ def watch_livestream(driver):
     try:
         driver.find_element_by_css_selector(
             'body > div:nth-child(12) > main > main > div > div.lower > div.nav-details > div > div.stream-selector > div > div.watch-options > div > div.options-section.provider-selection > ul > li.option.twitch').click()
-    except ElementNotInteractableException:
+    except (ElementNotInteractableException, NoSuchElementException):
         pass
     sleep(watch_time)
 
@@ -65,11 +65,16 @@ def login(driver):
 
 
 def main():
+    logged_in = False
+    driver = None
     while True:
         live = live_checker()
         if live is True:
-            driver = webdriver.Chrome(ChromeDriverManager().install())
-            login(driver)
+            if driver is None:
+                driver = webdriver.Chrome(ChromeDriverManager().install())
+            if logged_in is False:
+                login(driver)
+                logged_in = True
             watch_livestream(driver)
         else:
             sleep(live_check_time)
