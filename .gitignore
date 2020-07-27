@@ -15,4 +15,3 @@ pip-selfcheck.json
 !/links.p
 /venv/
 /test.py
-!/.idea/
