@@ -15,32 +15,21 @@ def live_checker():
     from twitch import TwitchClient
 
     client = TwitchClient(client_id='szwbnpgk8onxagzegef9wja3fd5s9r')
-    # channel_ids = ['124422593', '124420521', '36029255', '46273272', '36511475', '36513760', '72977645', '107870305',
-    #               '124425627', '104833324']
-    channel_ids = ['124422593', '124420521']
+    channels = {'lec': '124422593', 'lcs': '124420521'}
 
-    streams = []
-    for channel_id in channel_ids:
-        streams.append(client.streams.get_stream_by_user(channel_id))
+    for channel in channels:
+        if client.streams.get_stream_by_user(channels[channel]) is not None:
+            return channel
+        else:
+            continue
 
-    for stream in streams:
-        if stream is not None:
-            return True
-
-    return False
+    return None
 
 
-def watch_livestream(driver):
-    url = 'https://lolesports.com/live/'
+
+def watch_livestream(driver, league):
+    url = 'https://lolesports.com/live/{l}/{l}'.format(l=league)
     driver.get(url)
-    driver.implicitly_wait(5)
-    try:
-        driver.find_element_by_class_name('options-button').click()
-        driver.find_element_by_class_name('option').click()
-        driver.find_element_by_css_selector(
-                'body > div:nth-child(12) > main > main > div > div.lower > div.nav-details > div > div.stream-selector > div > div.watch-options > div > div.options-section.provider-selection > ul > li.option.twitch').click()
-    except (ElementNotInteractableException, NoSuchElementException):
-        pass
     sleep(watch_time)
 
 
@@ -69,14 +58,14 @@ def main():
     logged_in = False
     driver = None
     while True:
-        live = live_checker()
-        if live is True:
+        league = live_checker()
+        if league is not None:
             if driver is None:
                 driver = webdriver.Chrome(ChromeDriverManager().install())
             if logged_in is False:
                 login(driver)
                 logged_in = True
-            watch_livestream(driver)
+            watch_livestream(driver, league)
         else:
             sleep(live_check_time)
 
