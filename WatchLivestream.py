@@ -1,3 +1,5 @@
+from getpass import getpass
+from sys import stdout
 from time import sleep
 
 from selenium import webdriver
@@ -5,8 +7,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
-from getpass import getpass
-from sys import stdout
 
 watch_time = 60 * 60
 live_check_time = 60 * 30
@@ -15,12 +15,14 @@ live_check_time = 60 * 30
 def live_checker():
     from twitch import TwitchClient
 
-    client = TwitchClient(client_id='szwbnpgk8onxagzegef9wja3fd5s9r')
+    client = TwitchClient(client_id="szwbnpgk8onxagzegef9wja3fd5s9r")
     channels = {'lec': '124422593', 'lcs': '124420521'}
 
     for channel in channels:
-        if client.streams.get_stream_by_user(channels[channel]) is not None:
-            return channel
+        stream = client.streams.get_stream_by_user(channels[channel])
+        if stream is not None:
+            if 'REBROADCAST' not in stream.channel.status:
+                return channel
 
     return None
 
@@ -28,6 +30,14 @@ def live_checker():
 def watch_livestream(driver, league):
     url = 'https://lolesports.com/live/{l}/{l}'.format(l=league)
     driver.get(url)
+    """
+    iframe = driver.find_element_by_tag_name('iframe')
+    driver.switch_to.frame(iframe)
+    driver.implicitly_wait(10)
+    svg = driver.find_elements_by_tag_name('svg')[3]
+    for selector in selectors:
+        driver.find_element_by_css_selector(selector).click()
+    """
     sleep(watch_time)
 
 
@@ -71,7 +81,7 @@ def main():
             else:
                 print("No channel is live, checking in 30 minutes.")
                 for remaining in range(live_check_time, 0, -60 * 10):
-                    stdout.write(str(int(remaining/60)) + ' ')
+                    stdout.write(str(int(remaining / 60)) + ' ')
                     stdout.flush()
                     sleep(60 * 10)
         except KeyboardInterrupt:
@@ -79,7 +89,6 @@ def main():
             if logged_in is True:
                 driver.close()
             break
-
 
 
 if __name__ == "__main__":
