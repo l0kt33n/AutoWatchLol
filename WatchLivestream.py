@@ -16,7 +16,7 @@ def live_checker():
     from twitch import TwitchClient
 
     client = TwitchClient(client_id="szwbnpgk8onxagzegef9wja3fd5s9r")
-    channels = {'lec': '124422593', 'lcs': '124420521'}
+    channels = {'lec': '124422593', 'lcs': '124420521', 'riotgames':'36029255'}
 
     for channel in channels:
         stream = client.streams.get_stream_by_user(channels[channel])
@@ -28,7 +28,10 @@ def live_checker():
 
 
 def watch_livestream(driver, league):
-    url = 'https://lolesports.com/live/{l}/{l}'.format(l=league)
+    if league == 'riotgames':
+        url = 'https://lolesports.com/live/worlds/riotgames'
+    else:
+        url = 'https://lolesports.com/live/{l}/{l}'.format(l=league)
     driver.get(url)
     """
     iframe = driver.find_element_by_tag_name('iframe')
