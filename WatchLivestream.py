@@ -8,6 +8,9 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 
+import config
+
+
 watch_time = 60 * 60
 live_check_time = 60 * 30
 
@@ -68,8 +71,12 @@ def login(driver, username, password):
 def main():
     logged_in = False
     driver = None
-    username = input("Username: ")
-    password = getpass()
+    if config.username == '':
+        username = input("Username: ")
+        password = getpass()
+    else:
+        username = config.username
+        password = config.password
     while True:
         try:
             league = live_checker()
