@@ -1,6 +1,7 @@
 from getpass import getpass
 from sys import stdout
 from time import sleep
+import json
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -16,7 +17,10 @@ def live_checker():
     from twitch import TwitchClient
 
     client = TwitchClient(client_id="szwbnpgk8onxagzegef9wja3fd5s9r")
-    channels = {'lec': '124422593', 'lcs': '124420521'}
+    channels = {
+        'lec': '124422593',
+        'lcs': '124420521',
+        'riotgames': '36029255'}
 
     for channel in channels:
         stream = client.streams.get_stream_by_user(channels[channel])
@@ -28,23 +32,19 @@ def live_checker():
 
 
 def watch_livestream(driver, league):
-    url = 'https://lolesports.com/live/{l}/{l}'.format(l=league)
+    if league == 'riotgames':
+        url = 'https://lolesports.com/live/worlds/riotgames'
+    else:
+        url = 'https://lolesports.com/live/{l}/{l}'.format(l=league)
     driver.get(url)
-    """
-    iframe = driver.find_element_by_tag_name('iframe')
-    driver.switch_to.frame(iframe)
-    driver.implicitly_wait(10)
-    svg = driver.find_elements_by_tag_name('svg')[3]
-    for selector in selectors:
-        driver.find_element_by_css_selector(selector).click()
-    """
     sleep(watch_time)
 
 
 def login(driver, username, password):
     wait = WebDriverWait(driver, 10)
     driver.get('https://lolesports.com/')
-    login_button = wait.until(EC.element_to_be_clickable((By.ID, 'riotbar-account')))
+
+    login_button = driver.find_element_by_xpath('/html/body/div[1]/div[1]/nav/div/div/div/div[3]/div[3]/div/a')
     login_button.click()
     driver.implicitly_wait(5)
     username_box = driver.find_element_by_css_selector(
@@ -65,8 +65,18 @@ def login(driver, username, password):
 def main():
     logged_in = False
     driver = None
-    username = input("Username: ")
-    password = getpass()
+    filename = input("Credential Filename: ")
+    f = open(filename)
+    credentials = json.load(f)
+    if credentials['username'] == '':
+        username = input("Username: ")
+    else:
+        username = credentials['username']
+    if credentials['password'] == '':
+        password = getpass()
+    else:
+        password = credentials['password']
+
     while True:
         try:
             league = live_checker()
