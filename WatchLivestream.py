@@ -58,7 +58,7 @@ def login(driver, username, password):
     stay_signed_in.click()
     driver.find_element_by_css_selector(
         'body > div > div > div > div.grid.grid-direction__row.grid-page-web__content > div.grid.grid-direction__column.grid-page-web__wrapper > div > button').click()
-    wait.until(EC.element_to_be_clickable((By.ID, 'riotbar-account')))
+    sleep(5)
     return
 
 
