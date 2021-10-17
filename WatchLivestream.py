@@ -38,6 +38,10 @@ def watch_livestream(driver, league):
         url = 'https://lolesports.com/live/{l}/{l}'.format(l=league)
     driver.get(url)
     driver.set_window_size(200,200)
+    driver.set_network_conditions(
+        offline=False,
+        throughput=5*125000
+    )
     sleep(watch_time)
 
 
@@ -47,7 +51,7 @@ def login(driver, username, password):
     driver.maximize_window()
 
     login_button = driver.find_element(By.XPATH, '//*[@id="riotbar-right-content"]/div[3]/div/a')
-    login_button.click()    
+    login_button.click()
     try:
         element = WebDriverWait(driver,30).until(
             EC.presence_of_element_located((By.NAME,'username'))
@@ -94,7 +98,7 @@ def main():
             if league is not None:
                 print('{l} is live, opening chrome.....'.format(l=league.upper()))
                 if driver is None:
-                    driver = webdriver.Chrome(executable_path='/home/pi/AutoWatchLol/chromedriver/chromedriver')
+                    driver = webdriver.Chrome(executable_path='/home/pi/AutoWatchLol/chromedriver')
                 if logged_in is False:
                     login(driver, username, password)
                     logged_in = True
