@@ -1,5 +1,5 @@
 from getpass import getpass
-from sys import stdout
+from sys import stdout, argv
 from time import sleep
 import json
 
@@ -37,35 +37,46 @@ def watch_livestream(driver, league):
     else:
         url = 'https://lolesports.com/live/{l}/{l}'.format(l=league)
     driver.get(url)
+    driver.set_window_size(200,200)
     sleep(watch_time)
 
 
 def login(driver, username, password):
     wait = WebDriverWait(driver, 10)
     driver.get('https://lolesports.com/')
+    driver.maximize_window()
 
-    login_button = driver.find_element_by_xpath('/html/body/div[1]/div[1]/nav/div/div/div/div[3]/div[3]/div/a')
-    login_button.click()
-    driver.implicitly_wait(5)
-    username_box = driver.find_element_by_css_selector(
-        'body > div > div > div > div.grid.grid-direction__row.grid-page-web__content > div.grid.grid-direction__column.grid-page-web__wrapper > div > div.grid.grid-align-center.grid-justify-space-between.grid-fill.grid-direction__column.grid-panel-web__content.grid-panel__content > div > div > div > div.field.field--focus.field--animate > div > input')
+    login_button = driver.find_element(By.XPATH, '//*[@id="riotbar-right-content"]/div[3]/div/a')
+    login_button.click()    
+    try:
+        element = WebDriverWait(driver,30).until(
+            EC.presence_of_element_located((By.NAME,'username'))
+        )
+    finally:
+        driver.quit
+    username_box = driver.find_element(By.NAME, 'username')
     username_box.send_keys(username)
-    password_box = driver.find_element_by_css_selector(
-        'body > div > div > div > div.grid.grid-direction__row.grid-page-web__content > div.grid.grid-direction__column.grid-page-web__wrapper > div > div.grid.grid-align-center.grid-justify-space-between.grid-fill.grid-direction__column.grid-panel-web__content.grid-panel__content > div > div > div > div.field.password-field.field--animate > div > input')
+    password_box = driver.find_element(By.NAME, 'password')
     password_box.send_keys(password)
-    stay_signed_in = driver.find_element_by_css_selector(
-        'body > div > div > div > div.grid.grid-direction__row.grid-page-web__content > div.grid.grid-direction__column.grid-page-web__wrapper > div > div.grid.grid-align-center.grid-justify-space-between.grid-fill.grid-direction__column.grid-panel-web__content.grid-panel__content > div > div > div > div.grid.grid-justify-space-between.grid-direction__row > div.mobile-checkbox.signin-checkbox > label > input[type=checkbox]')
+    stay_signed_in = driver.find_element(By.XPATH, '/html/body/div/div/div/div[2]/div/div/div[2]/div/div/div/div[4]/div[1]/label/input')
     stay_signed_in.click()
-    driver.find_element_by_css_selector(
-        'body > div > div > div > div.grid.grid-direction__row.grid-page-web__content > div.grid.grid-direction__column.grid-page-web__wrapper > div > button').click()
-    sleep(5)
+    driver.find_element(By.XPATH, '/html/body/div/div/div/div[2]/div/div/button').click()
+    try:
+        element = WebDriverWait(driver,30).until(
+            EC.presence_of_element_located((By.XPATH,'//*[@id="riotbar-right-content"]/div[3]'))
+        )
+    finally:
+        driver.quit
     return
 
 
 def main():
     logged_in = False
     driver = None
-    filename = input("Credential Filename: ")
+    if len(argv) == 1:
+        filename = input("Credential Filename: ")
+    else:
+        filename = argv[1]
     f = open(filename)
     credentials = json.load(f)
     if credentials['username'] == '':
@@ -83,7 +94,7 @@ def main():
             if league is not None:
                 print('{l} is live, opening chrome.....'.format(l=league.upper()))
                 if driver is None:
-                    driver = webdriver.Chrome(ChromeDriverManager(log_level=0).install())
+                    driver = webdriver.Chrome(executable_path='/home/pi/AutoWatchLol/chromedriver/chromedriver')
                 if logged_in is False:
                     login(driver, username, password)
                     logged_in = True
