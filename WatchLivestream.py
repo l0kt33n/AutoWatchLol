@@ -20,6 +20,10 @@ def live_checker():
     channels = {
         'lec': '124422593',
         'lcs': '124420521',
+        'lpl': '124425627',
+        'lck': '124425501',
+        'cblol': '36511475',
+        'lla': '142055874',
         'riotgames': '36029255'}
 
     for channel in channels:
