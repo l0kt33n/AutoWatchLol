@@ -29,7 +29,6 @@ def live_checker():
     for channel in channels:
         stream = client.streams.get_stream_by_user(channels[channel])
         if stream is not None:
-            print(stream.channel.status)
             if 'REBROADCAST' not in stream.channel.status and 'Rebroadcast' not in stream.channel.status:
                 return channel
 
