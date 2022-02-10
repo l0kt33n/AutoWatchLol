@@ -21,7 +21,6 @@ def live_checker(client):
         'lck': '124425501',
         'cblol': '36511475',
         'lla': '142055874',
-        'lcs-academy': '124421740',
         'riotgames': '36029255'}
 
     try:
