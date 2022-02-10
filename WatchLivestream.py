@@ -7,16 +7,13 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from webdriver_manager.chrome import ChromeDriverManager
 
 watch_time = 60 * 60
 live_check_time = 60 * 30
 
 
-def live_checker():
-    from twitch import TwitchClient
-
-    client = TwitchClient(client_id="szwbnpgk8onxagzegef9wja3fd5s9r")
+def live_checker(client):
+    print("Checking for live streams....")
     channels = {
         'lec': '124422593',
         'lcs': '124420521',
@@ -24,36 +21,49 @@ def live_checker():
         'lck': '124425501',
         'cblol': '36511475',
         'lla': '142055874',
+        'lcs-academy': '124421740',
         'riotgames': '36029255'}
 
-    for channel in channels:
-        stream = client.streams.get_stream_by_user(channels[channel])
-        if stream is not None:
-            if 'REBROADCAST' not in stream.channel.status and 'Rebroadcast' not in stream.channel.status:
-                return channel
+    try:
+        streams = client.get_streams(user_ids=channels.values())
+        if streams:
+            for stream in streams:
+                if 'REBROADCAST' not in stream['title'] and 'Rebroadcast' not in stream['title']:
+                    print('{l} is live!'.format(l=stream['user_name']))
+                    return True
+    except Exception as e:
+        print(e)
+        print("Error checking for live streams, trying again in 30 minutes.")
+        return False
 
-    return None
+    print("\nNo live streams found.")
+    return False
 
 
-def watch_livestream(driver, league):
-    if league == 'riotgames':
-        url = 'https://lolesports.com/live/worlds/riotgames'
-    else:
-        url = 'https://lolesports.com/live/{l}/{l}'.format(l=league)
+def watch_livestream(driver):
+    url = 'https://lolesports.com/live/'
     driver.get(url)
+    sleep(30)
+    driver.set_network_conditions(
+        offline=False,
+        latency=0,  # additional latency (ms)
+        download_throughput=500 * 1024,  # maximal throughput
+        upload_throughput=500 * 1024)  # maximal throughput
     sleep(watch_time)
 
 
 def login(driver, username, password):
     wait = WebDriverWait(driver, 10)
-    driver.get('https://lolesports.com/')
     driver.maximize_window()
+    driver.get('https://lolesports.com/')
 
-    login_button = driver.find_element(By.XPATH, '//*[@id="riotbar-right-content"]/div[3]/div/a')
+    login_button = driver.find_element(
+        By.CSS_SELECTOR, '[data-testid="riotbar-account-button-login"]')
     login_button.click()
     try:
-        element = WebDriverWait(driver,90).until(
-            EC.presence_of_element_located((By.NAME,'username'))
+        element = WebDriverWait(driver, 90).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, '[data-testid="btn-signin-submit"]'))
         )
     finally:
         driver.quit
@@ -61,50 +71,67 @@ def login(driver, username, password):
     username_box.send_keys(username)
     password_box = driver.find_element(By.NAME, 'password')
     password_box.send_keys(password)
-    stay_signed_in = driver.find_element(By.XPATH, '/html/body/div/div/div/div[2]/div/div/div[2]/div/div/div/div[4]/div[1]/label/input')
+    stay_signed_in = driver.find_element(
+        By.CSS_SELECTOR, '[data-testid="checkbox-remember-me"]')
     stay_signed_in.click()
-    driver.find_element(By.XPATH, '/html/body/div/div/div/div[2]/div/div/button').click()
+    driver.find_element(
+        By.CSS_SELECTOR, '[data-testid="btn-signin-submit"]').click()
     try:
-        element = WebDriverWait(driver,90).until(
-            EC.presence_of_element_located((By.XPATH,'//*[@id="riotbar-right-content"]/div[3]'))
-            )
+        element = WebDriverWait(driver, 90).until(
+            EC.presence_of_element_located((By.ID, 'riotbar-account-bar'))
+        )
     finally:
         driver.quit
-    driver.set_window_size(200,400)
+    driver.set_window_size(200, 400)
     return
 
 
 def main():
     logged_in = False
     driver = None
+
     if len(argv) == 1:
         filename = input("Credential Filename: ")
     else:
         filename = argv[1]
     f = open(filename)
     credentials = json.load(f)
+
     if credentials['username'] == '':
         username = input("Username: ")
     else:
         username = credentials['username']
+
     if credentials['password'] == '':
         password = getpass()
     else:
         password = credentials['password']
 
+    if credentials['client_id'] == '':
+        client_id = input("client_id: ")
+    else:
+        client_id = credentials['client_id']
+
+    if credentials['client_secret'] == '':
+        client_secret = getpass()
+    else:
+        client_secret = credentials['client_secret']
+
+    from twitch import TwitchHelix
+    client = TwitchHelix(client_id=client_id, client_secret=client_secret)
+    client.get_oauth()
+
     while True:
         try:
             if driver is None:
-                driver = webdriver.Chrome(executable_path='/home/pi/AutoWatchLol/chromedriver')
+                driver = webdriver.Chrome()
             if logged_in is False:
                 login(driver, username, password)
                 logged_in = True
-            league = live_checker()
-            if league is not None:
-                print('{l} is live, opening chrome.....'.format(l=league.upper()))
-                watch_livestream(driver, league)
+            live = live_checker(client)
+            if live:
+                watch_livestream(driver)
             else:
-                print("No channel is live, checking in 30 minutes.")
                 for remaining in range(live_check_time, 0, -60 * 10):
                     stdout.write(str(int(remaining / 60)) + ' ')
                     stdout.flush()
