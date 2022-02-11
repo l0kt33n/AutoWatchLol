@@ -12,7 +12,16 @@ watch_time = 60 * 60
 live_check_time = 60 * 30
 
 
+
 def live_checker(client):
+    """ Checks if the stream is live
+
+    Args:
+        client: TwitchHelix object
+
+    Returns:
+        boolean: True if the stream is live, False otherwise
+    """    
     print("Checking for live streams....")
     channels = {
         'lec': '124422593',
@@ -40,6 +49,11 @@ def live_checker(client):
 
 
 def watch_livestream(driver):
+    """ Watches the livestream
+
+    Args:
+        driver: Selenium webdriver object
+    """
     url = 'https://lolesports.com/live/'
     driver.get(url)
     league = driver.current_url.split("/live/")[-1].split('/')[0]
@@ -55,6 +69,13 @@ def watch_livestream(driver):
 
 
 def login(driver, username, password):
+    """ Logs into the website
+
+    Args:
+        driver: Selenium webdriver object
+        username (str): Username
+        password (str): Password
+    """
     wait = WebDriverWait(driver, 10)
     driver.maximize_window()
     driver.get('https://lolesports.com/')
