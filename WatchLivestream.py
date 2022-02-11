@@ -32,8 +32,7 @@ def live_checker(client):
         'riotgames': '36029255'}
 
     try:
-        streams = client.get_streams(user_ids=channels.values())
-        if streams:
+        if streams := client.get_streams(user_ids=channels.values()):
             for stream in streams:
                 if 'REBROADCAST' not in stream['title'] and 'Rebroadcast' not in stream['title']:
                     print('{l} is live!'.format(l=stream['user_name']))
@@ -112,10 +111,7 @@ def main():
     logged_in = False
     driver = None
 
-    if len(argv) == 1:
-        filename = input("Credential Filename: ")
-    else:
-        filename = argv[1]
+    filename = input("Credential Filename: ") if len(argv) == 1 else argv[1]
     f = open(filename)
     credentials = json.load(f)
 
@@ -150,11 +146,10 @@ def main():
                 options.add_experimental_option(
                     'excludeSwitches', ['enable-logging'])
                 driver = webdriver.Chrome(options=options)
-            if logged_in is False:
+            if not logged_in:
                 login(driver, username, password)
                 logged_in = True
-            live = live_checker(client)
-            if live:
+            if live := live_checker(client):
                 watch_livestream(driver)
             else:
                 for remaining in range(live_check_time, 0, -60 * 10):
@@ -163,7 +158,7 @@ def main():
                     sleep(60 * 10)
         except KeyboardInterrupt:
             print("Exiting....")
-            if logged_in is True:
+            if logged_in:
                 driver.close()
             break
 
