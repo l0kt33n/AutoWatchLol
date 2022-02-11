@@ -42,6 +42,9 @@ def live_checker(client):
 def watch_livestream(driver):
     url = 'https://lolesports.com/live/'
     driver.get(url)
+    league = driver.current_url.split("/live/")[-1].split('/')[0]
+    url = url + league + '/' + league
+    driver.get(url)
     sleep(30)
     driver.set_network_conditions(
         offline=False,
@@ -123,7 +126,9 @@ def main():
     while True:
         try:
             if driver is None:
-                driver = webdriver.Chrome()
+                options = webdriver.ChromeOptions()
+                options.add_experimental_option('excludeSwitches', ['enable-logging'])
+                driver = webdriver.Chrome(options=options)
             if logged_in is False:
                 login(driver, username, password)
                 logged_in = True
