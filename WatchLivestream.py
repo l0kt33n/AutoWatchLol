@@ -12,7 +12,6 @@ watch_time = 60 * 60
 live_check_time = 60 * 30
 
 
-
 def live_checker(client):
     """ Checks if the stream is live
 
@@ -21,7 +20,7 @@ def live_checker(client):
 
     Returns:
         boolean: True if the stream is live, False otherwise
-    """    
+    """
     print("Checking for live streams....")
     channels = {
         'lec': '124422593',
@@ -148,7 +147,8 @@ def main():
         try:
             if driver is None:
                 options = webdriver.ChromeOptions()
-                options.add_experimental_option('excludeSwitches', ['enable-logging'])
+                options.add_experimental_option(
+                    'excludeSwitches', ['enable-logging'])
                 driver = webdriver.Chrome(options=options)
             if logged_in is False:
                 login(driver, username, password)
