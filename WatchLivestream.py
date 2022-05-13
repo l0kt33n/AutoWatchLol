@@ -27,7 +27,7 @@ def live_checker(client):
         'lcs': '124420521',
         'lpl': '124425627',
         'lck': '124425501',
-        'cblol': '36511475',
+        'cblol-brazil': '36511475',
         'lla': '142055874',
         'riotgames': '36029255'}
 
@@ -55,7 +55,10 @@ def watch_livestream(driver):
     url = 'https://lolesports.com/live/'
     driver.get(url)
     league = driver.current_url.split("/live/")[-1].split('/')[0]
-    url = url + league + '/' + league
+    if league == 'msi':
+        url = url + league + '/' + 'riotgames'
+    else:
+        url = url + league + '/' + league
     driver.get(url)
     sleep(30)
     driver.set_network_conditions(
@@ -76,10 +79,11 @@ def login(driver, username, password):
     """
     wait = WebDriverWait(driver, 10)
     driver.maximize_window()
+    
     driver.get('https://lolesports.com/')
-
+    
     login_button = driver.find_element(
-        By.CSS_SELECTOR, '[data-testid="riotbar-account-button-login"]')
+        By.CSS_SELECTOR, "#riotbar-right-content > div.undefined.riotbar-account-reset._2f9sdDMZUGg63xLkFmv-9O.riotbar-account-container > div > a")
     login_button.click()
     try:
         element = WebDriverWait(driver, 90).until(
