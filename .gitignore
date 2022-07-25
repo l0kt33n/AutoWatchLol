@@ -18,3 +18,4 @@ pip-selfcheck.json
 .DS_Store
 */.DS_Store
 credentials*.json
+/chrome_data/
