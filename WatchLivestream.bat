@@ -1,2 +1,2 @@
-START "" venv/Scripts/python.exe WatchLivestream.py credentials.json
-START "" venv/Scripts/python.exe WatchLivestream.py credentials2.json
+START "" python.exe WatchLivestream.py credentials_1.json
+START "" python.exe WatchLivestream.py credentials_2.json
